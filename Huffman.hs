@@ -2,6 +2,7 @@ module Huffman where
 
 import Data.List
 import Data.PSQueue
+import Data.Maybe
 import BTree
 
 type Alphabet = Char
@@ -30,11 +31,6 @@ genHuffmanTree as ws = head $ keys $ genHuffmanTree' treePQ
                                                      else q
 
 
--- genHuffmanTree' :: PSQ (BTree (Maybe Alphabet)) Weight -> PSQ (BTree (Maybe Alphabet)) Weight 
--- genHuffmanTree' q = if size q > 1 
---                          then genHuffmanTree' $ action1 q 
---                          else q
-
 action1 :: PSQ (BTree (Maybe Alphabet)) Weight -> PSQ (BTree (Maybe Alphabet)) Weight
 action1 q = let
             t1 = findMin q 
@@ -49,24 +45,16 @@ action1 q = let
 strip :: Maybe a -> a
 strip (Just x) = x
 
-huffmanEncoding :: [Alphabet] -> [Weight] -> [Codeword]
-huffmanEncoding = error "Not Implemented"
+hoffmanCodeword :: BTree (Maybe Alphabet) -> Alphabet -> String -> String
+hoffmanCodeword Nil _ _ = "" 
+hoffmanCodeword (Node left val right) target acc 
+                                     | isNothing val = hoffmanCodeword left target (acc ++ "0") ++ hoffmanCodeword right target (acc ++ "1")
+                                     | val == Just target = acc
+                                     | otherwise = [] 
 
-tmp = "aabbbcdd"
-asws = generateInputTuple tmp
-tree = uncurry genHuffmanTree asws
+huffmanEncoding :: [Alphabet] -> [Weight] -> [(Alphabet,Codeword)]
+huffmanEncoding as ws = zip as codes 
+                where 
+                    t = genHuffmanTree as ws 
+                    codes = map (\a -> hoffmanCodeword t a []) as 
 
-{-
-
-Node 
-    (Node 
-        (Node Nil (Just 'b') Nil) 
-        Nothing 
-        (Node Nil (Just 'd') Nil)) 
-    Nothing 
-    (Node 
-        (Node Nil (Just 'a') Nil) 
-        Nothing 
-        (Node Nil (Just 'c') Nil))
-
--}
